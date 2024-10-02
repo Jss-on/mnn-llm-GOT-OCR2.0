@@ -10,9 +10,9 @@
 
 ## 运行说明
 
-1. 实现的是GOT-OCR mnn cpu版本，cuda版本目前还有错误
+1. 实现的是GOT-OCR mnn cpu版本，cuda版本目前还有错误， mnn中fuseTransformer 结果也不对。
 2. 首先运行 export/llmexport.py 生成onnx
-3. 然后安装"pip install mnn"， 使用命令 mnnconvert -f ONNX --modelFile vision.onnx --MNNModel --bizCode MNN   生成对应mnn文件, 将文件放入到 model文件夹下，。 注意这里名字需要是 vision.mnn 和 lmm.mnn (因为mnn原始代码src/llmconfig.hpp里面写死了)
+3. 然后安装"pip install mnn"， 使用命令 mnnconvert -f ONNX --modelFile vision.onnx --MNNModel --bizCode MNN   生成对应mnn文件, 将文件放入到 model文件夹下。 注意这里名字需要是 vision.mnn 和 lmm.mnn (因为mnn原始代码src/llmconfig.hpp里面写死了)。
 4. 编译mnn-llm ：  ./script/build.sh
 5. 运行: ./build/cli-demo ./model/config.json. 3.jpg
 
