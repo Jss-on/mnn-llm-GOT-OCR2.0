@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(mnn-llm)
 
 option(BUILD_FOR_ANDROID "Build for android whith mini memory mode." OFF)
-option(LLM_SUPPORT_VISION "Llm model support vision input." OFF)
+option(LLM_SUPPORT_VISION "Llm model support vision input." ON)
 option(DUMP_PROFILE_INFO "Dump profile info when chat." OFF)
 option(BUILD_JNI "Build JNI for android app." OFF)
 

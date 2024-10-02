@@ -71,6 +71,7 @@ public:
     Llm(std::shared_ptr<LlmConfig> config) : config_(config) {}
     virtual ~Llm();
     void chat();
+    void ocr(const std::string& imgpath);
     void reset();
     static Llm* createLLM(const std::string& config_path);
     virtual void load();
@@ -104,7 +105,7 @@ public:
     int64_t decode_us_ = 0;
     float load_progress_ = 0.f;
     bool is_single_ = true;
-    bool attention_fused_ = true;
+    bool attention_fused_ = false;
 protected:
     std::shared_ptr<LlmConfig> config_;
     std::shared_ptr<Tokenizer> tokenizer_;

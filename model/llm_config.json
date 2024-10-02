@@ -1,0 +1,28 @@
+{
+    "hidden_size": 1024,
+    "layer_nums": 24,
+    "attention_mask": "float",
+    "key_value_shape": [
+        2,
+        1,
+        0,
+        16,
+        64
+    ],
+    "prompt_template": "%s",
+    "is_visual": true,
+    "image_mean": [
+        122.7709383,
+        116.7460125,
+        104.09373615000001
+    ],
+    "image_norm": [
+        0.01459842661924292,
+        0.015007768493717056,
+        0.014220065717024088
+    ],
+    "image_size": 1024,
+    "vision_start": 151857,
+    "vision_end": 151858,
+    "image_pad": 151859
+}

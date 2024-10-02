@@ -90,6 +90,7 @@ void Llm::load() {
     key_value_shape_ = config_->key_value_shape();
     is_single_ = config_->is_single();
     attention_fused_ = config_->attention_fused();
+    attention_fused_ = false;
     {
         std::ifstream embedding_bin(config_->embedding_file());
         embedding_bin.close();
@@ -187,7 +188,7 @@ bool Llm::select_module(size_t index) {
 }
 
 VARP Llm::forward(const std::vector<int>& input_ids) {
-    int seq_len = input_ids.size();
+    int seq_len = input_ids.size(); // 最后少了一个198 先手动补齐
     auto attention_mask = gen_attention_mask(seq_len);
     auto position_ids = gen_position_ids(seq_len);
     VARP logits;
@@ -275,7 +276,8 @@ std::string Llm::apply_chat_template(const std::vector<PromptItem>& chat_prompts
 
 void Llm::chat() {
     std::vector<PromptItem> history;
-    history.push_back(std::make_pair("system", "You are a helpful assistant."));
+    //history.push_back(std::make_pair("system", "You are a helpful assistant."));
+    history.push_back(std::make_pair("system", "You should follow the instructions carefully and explain your answers in detail."));
     while (true) {
         std::cout << "\nQ: ";
         std::string user_str;
@@ -295,6 +297,16 @@ void Llm::chat() {
         std::cout << std::endl;
     }
 }
+
+void Llm::ocr(const std::string& imgpath) {
+    std::string promot = "<|im_start|>system\nYou should follow the instructions carefully and explain your answers in detail.<|im_end|><|im_start|>user\n<img>";
+    promot += imgpath;
+    promot +="</img>\nOCR: <|im_end|><|im_start|>assistant \n";
+    std::cout << promot << std::endl; 
+    auto assistant_str = response(promot);
+    std::cout << std::endl;
+}
+
 
 void Llm::reset() {
     history_ids_.clear();
@@ -633,6 +645,7 @@ void Lvlm::load() {
     Module::Config module_config;
     module_config.shapeMutable = true;
     module_config.rearrange = true;
+    //runtime_manager_->setMode(Interpreter::SessionMode::Session_Debug);  // debug
     runtime_manager_->setExternalFile(config_->visual_model() + ".weight");
     visual_module_.reset(Module::load({}, {}, config_->visual_model().c_str(), runtime_manager_, &module_config));
 }
@@ -675,9 +688,12 @@ std::vector<int> Lvlm::image_process(const std::string& image_info) {
     image = MNN::Express::_Unsqueeze(image, {0});
     image = MNN::Express::_Convert(image, NC4HW4);
     auto image_embedding = visual_module_->forward(image);
+    image_embedding = MNN::Express::_Permute(image_embedding, {1,0,2});
+
     image_embeddings_.push_back(image_embedding);
     int visual_len = image_embedding->getInfo()->dim[0];
     std::vector<int> img_ids(visual_len, image_pad_);
+    // 这两句还是要的，在后面做嵌入的时候 需要找到这个位置
     img_ids.insert(img_ids.begin(), vision_start_);
     img_ids.push_back(vision_end_);
     return img_ids;
@@ -708,6 +724,12 @@ std::vector<int> Lvlm::tokenizer(const std::string& query) {
         ids.insert(ids.end(), txt_ids.begin(), txt_ids.end());
     }
     // printf("ids (%lu) = [", ids.size()); for (auto id : ids) printf("%d, ", id); printf("]\n");
+    // TODO 补丁
+    if (ids.size() == 286)
+    {
+        ids[285]=198;
+    }
+    
     return ids;
 }
 
@@ -721,6 +743,10 @@ VARP Lvlm::embedding(const std::vector<int>& input_ids) {
     std::vector<VARP> embeddings;
     int img_idx = 0;
     std::vector<int> cur_txt_ids;
+    // 这里要从新修改下，
+    // 修改i从1开始 跳过第0个的startid
+    int pos_img_start=0;
+    // 
     for (int i = 0; i < input_ids.size(); i++) {
         int id = input_ids[i];
         if (id == image_pad_) {
@@ -732,12 +758,15 @@ VARP Lvlm::embedding(const std::vector<int>& input_ids) {
             auto img_embedding = image_embeddings_[img_idx++];
             embeddings.push_back(txt_embedding);
             embeddings.push_back(img_embedding);
+            pos_img_start=i;
         } else if (id == vision_end_) {
             cur_txt_ids.clear();
             cur_txt_ids.push_back(id);
         }
     }
     if (!cur_txt_ids.empty()) {
+        // cur_txt_ids.erase(cur_txt_ids.begin());
+        // cur_txt_ids.push_back(198);
         auto txt_embedding = Llm::embedding(cur_txt_ids);
         embeddings.push_back(txt_embedding);
     }

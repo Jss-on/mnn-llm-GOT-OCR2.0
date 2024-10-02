@@ -54,14 +54,17 @@ int main(int argc, const char* argv[]) {
         std::cout << "Usage: " << argv[0] << " model_dir <prompt.txt>" << std::endl;
         return 0;
     }
+    // ./build/cli_demo /model/config.json /data/Learning/GOT-OCR2.0/GOT-OCR-2.0-master/1.jpg
     std::string model_dir = argv[1];
     std::cout << "model path is " << model_dir << std::endl;
     std::unique_ptr<Llm> llm(Llm::createLLM(model_dir));
     llm->load();
-    if (argc < 3) {
-        llm->chat();
+    if (argc < 4) {
+        std::string imgpath = argv[2];
+        //llm->chat();
+        llm->ocr(imgpath);
     }
-    std::string prompt_file = argv[2];
-    benchmark(llm.get(), prompt_file);
+    //std::string prompt_file = argv[2];
+    //benchmark(llm.get(), prompt_file);
     return 0;
 }
