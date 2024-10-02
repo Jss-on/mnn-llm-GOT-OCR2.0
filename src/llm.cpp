@@ -90,7 +90,7 @@ void Llm::load() {
     key_value_shape_ = config_->key_value_shape();
     is_single_ = config_->is_single();
     attention_fused_ = config_->attention_fused();
-    attention_fused_ = false;
+    //attention_fused_ = false;
     {
         std::ifstream embedding_bin(config_->embedding_file());
         embedding_bin.close();
