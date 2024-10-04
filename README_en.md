@@ -5,8 +5,13 @@
 [![Download](https://img.shields.io/github/downloads/wangzhaode/mnn-llm/total)](https://github.com/wangzhaode/mnn-llm/releases)
 [![Documentation Status](https://readthedocs.org/projects/mnn-llm/badge/?version=latest)](https://mnn-llm.readthedocs.io/en/latest/?badge=latest)
 
-[Chinese](./README.md)
-
+## Running Instructions
+1. This implements the GOT-OCR MNN CPU version. The CUDA version currently has errors. ~~Modify backend_type in model/config.json to cpu or cuda to change the backend~~
+2. First, run export/llmexport.py to generate ONNX
+3. Then install "pip install mnn" and use the command: mnnconvert -f ONNX --modelFile ./model/onnx/llm.onnx --MNNModel ./model/llm.mnn --bizCode MNN --transformerFuse
+   * Generate the corresponding MNN file and place it in the model folder. Note that the names here need to be vision.mnn and lmm.mnn (because they are hardcoded in the original MNN code src/llmconfig.hpp).
+4. Compile mnn-llm: ./script/build.sh
+5. Run: ./build/cli-demo ./model/config.json. 3.jpg
 ## Example Projects
 
 - [cli](./demo/cli_demo.cpp): Compile using the command line, for Android compilation refer to[android_build.sh](./script/android_build.sh)
