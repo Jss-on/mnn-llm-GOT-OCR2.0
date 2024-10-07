@@ -1,4 +1,14 @@
 # llm-export
+English
+llm-export is a tool for exporting LLM models, capable of converting LLM models to ONNX and MNN formats.
+* 🚀 Optimized original code to support dynamic shapes
+* 🚀 Optimized original code to reduce constant parts
+* 🚀 Used OnnxSlim to optimize ONNX models, improving performance by about 5%; by @inisis
+* 🚀 Supports exporting LoRA weights to ONNX and MNN
+* 🚀 ONNX inference code OnnxLLM
+
+Installation
+# llm-export
 
 [English](./README_en.md)
 
